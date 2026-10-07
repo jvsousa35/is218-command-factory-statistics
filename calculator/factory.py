@@ -1,6 +1,7 @@
-"""Create calculations by operation name."""
+"""Construct calculator requests."""
 from calculator.calculation import Calculation
 from calculator.operations import Operations
+from calculator.validation import numeric_values
 
 
 class CalculationFactory:
@@ -11,11 +12,13 @@ class CalculationFactory:
         "divide": Operations.divide,
         "square": Operations.square,
         "sqrt": Operations.sqrt,
-        "sum": Operations.sum,
         "power": Operations.power,
+        "sum": Operations.sum,
+        "mean": Operations.mean,
+        "stddev": Operations.stddev,
     }
 
-    counts = {
+    operand_counts = {
         "add": 2,
         "subtract": 2,
         "multiply": 2,
@@ -25,41 +28,65 @@ class CalculationFactory:
         "power": 1,
     }
 
+    allowed_options = {
+        "power": {"exponent"},
+        "stddev": {"ddof"},
+    }
+
     @staticmethod
-    def create(name, *values, **options):
+    def create(
+        name,
+        *values,
+        **options
+    ):
         name = name.strip().lower()
 
         try:
-            operation = CalculationFactory.operations[name]
+            operation = (
+                CalculationFactory
+                .operations[name]
+            )
         except KeyError:
-            raise ValueError("Unknown operation.")
+            raise ValueError(
+                f"Unknown operation: {name}"
+            ) from None
 
-        if name in CalculationFactory.counts:
-            expected = CalculationFactory.counts[name]
-            if len(values) != expected:
-                raise ValueError("Wrong operand count.")
+        allowed = (
+            CalculationFactory
+            .allowed_options
+            .get(name, set())
+        )
 
-        if name == "sum" and len(values) < 1:
-            raise ValueError("Values required.")
+        converted_options = {}
 
-        if name == "power":
-            allowed = {"exponent"}
-        else:
-            allowed = set()
-
-        if set(options) - allowed:
-            raise ValueError("Unknown option.")
-
-        if "exponent" in options:
-            try:
-                options["exponent"] = float(
-                    options["exponent"]
+        for key, value in options.items():
+            if key not in allowed:
+                raise ValueError(
+                    f"Unsupported option "
+                    f"for {name}: {key}"
                 )
-            except (TypeError, ValueError, OverflowError):
-                raise ValueError("Invalid option.")
+
+            converted_options[key] = (
+                numeric_values([value])[0]
+            )
+
+        count = (
+            CalculationFactory
+            .operand_counts
+            .get(name)
+        )
+
+        if (
+            count is not None
+            and len(values) != count
+        ):
+            raise ValueError(
+                f"{name} requires exactly "
+                f"{count} value(s)."
+            )
 
         return Calculation(
             values,
             operation,
-            **options
+            **converted_options
         )

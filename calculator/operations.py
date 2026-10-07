@@ -1,38 +1,63 @@
-"""Static calculator operations."""
-from math import sqrt, pow
+"""Stateless mathematical operations."""
+from math import pow, sqrt
+
+from calculator.statistics import (
+    mean,
+    standard_deviation,
+)
 
 
 class Operations:
     @staticmethod
-    def add(a, b):
+    def add(a, b) -> float:
         return a + b
 
     @staticmethod
-    def subtract(a, b):
+    def subtract(a, b) -> float:
         return a - b
 
     @staticmethod
-    def multiply(a, b):
+    def multiply(a, b) -> float:
         return a * b
 
     @staticmethod
-    def divide(a, b):
+    def divide(a, b) -> float:
         return a / b
 
     @staticmethod
-    def square(value):
+    def square(value) -> float:
         return value * value
 
     @staticmethod
-    def sqrt(value):
+    def sqrt(value) -> float:
         return sqrt(value)
 
     @staticmethod
-    def sum(*values):
+    def power(
+        value,
+        *,
+        exponent=2
+    ) -> float:
+        return pow(value, exponent)
+
+    @staticmethod
+    def sum(*values) -> float:
         if not values:
-            raise ValueError("Values required.")
+            raise ValueError(
+                "Enter at least one value."
+            )
         return sum(values)
 
     @staticmethod
-    def power(value, *, exponent=2):
-        return pow(value, exponent)
+    def mean(*values) -> float:
+        return mean(values)
+
+    @staticmethod
+    def stddev(
+        *values,
+        ddof=1
+    ) -> float:
+        return standard_deviation(
+            values,
+            ddof=ddof
+        )
