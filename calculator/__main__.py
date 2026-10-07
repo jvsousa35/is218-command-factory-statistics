@@ -1,7 +1,15 @@
-"""Launch with python -m calculator."""
+from calculator.factory import CalculationFactory
 
-from calculator.cli import run
 
-# Python executes this module when the user types python -m calculator.
-# Keep arithmetic and the REPL in other modules so tests can import them.
-run()
+addition = CalculationFactory.create(
+    "add", 2, 3
+)
+
+power = CalculationFactory.create(
+    "power",
+    3,
+    exponent=4
+)
+
+print(addition.get_result())
+print(power.get_result())
